@@ -19,3 +19,4 @@
 # Ignore git checkout and generated files
 authzforce-core/
 results/
+!bin/*.jar
