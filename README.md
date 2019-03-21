@@ -98,7 +98,7 @@ We can now launch the models generation by executing the following commands from
 
 ```bash
 java -d64 -Xmx10000m -jar bin/botsing-model-generation-1.0.4-SNAPSHOT-jar-with-dependencies.jar \
-	-project_cp "$authzforce_project_cp" \
+	-project_cp "$authzforce_classpath" \
 	-project_prefix "org.ow2.authzforce" \
 	-out_dir "results/authzforce-core"
 ```
