@@ -24,7 +24,7 @@ The main steps of our model seeding approach are:
 
 For more details on model seeding, please see the [STAMP Deliverable D3.3 - Prototype of amplification tool for common and anomaly behaviors](https://github.com/STAMP-project/docs-forum/blob/master/docs/d33_prototype_of_amplification_tool_for_common_and_anomaly_behaviors.pdf).
 
-In the next steps, we will explain how to set up the example project used in this tutorial ([AuthZForce](https://authzforce.ow2.org)); how to generate behavioral models from the source code and test execution of an application using static and dynamic analysis; and how to use those models to _seed_ the test case generation process of EvoSuite.
+In the next steps, we will explain how to set up the example project used in this tutorial ([AuthZForce](https://authzforce.ow2.org)); how to generate behavioral models from the source code and test execution of an application using static and dynamic analysis using the `botsing-model-generation` utility (available in [`bin/`](https://github.com/STAMP-project/evosuite-model-seeding-tutorial/tree/master/bin)); and how to use those models to _seed_ the test case generation process of EvoSuite using `evosuite-master` (also available in [`bin/`](https://github.com/STAMP-project/evosuite-model-seeding-tutorial/tree/master/bin)).
 
 First, lets clone this repository locally:
 
