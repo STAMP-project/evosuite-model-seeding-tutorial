@@ -37,10 +37,10 @@ _Note:_ The project used as example in this tutorial is Maven based. However, th
 
 ## Example project: AuthZForce
 
-This tutorial illustrates how to generate unit tests for [AuthZForce](https://authzforce.ow2.org), an Attribute-Based Access Control framework. More specifically, we will use the [`authzforce-core`](https://gitlab.ow2.org/authzforce/core) Maven project. Lets clone and build the project locally:
+This tutorial illustrates how to generate unit tests for [AuthZForce](https://authzforce.ow2.org), an Attribute-Based Access Control framework. More specifically, we will use the [`authzforce-core`](https://gitlab.ow2.org/authzforce/core) Maven project. Lets clone and build the latest version of the project locally:
 
 ```bash
-git clone https://gitlab.ow2.org/authzforce/core authzforce-core
+git clone --branch release-13.3.1 https://gitlab.ow2.org/authzforce/core authzforce-core
 cd authzforce-core
 ```
 To execute test cases, `authzforce-core` requires the following environment variables:
