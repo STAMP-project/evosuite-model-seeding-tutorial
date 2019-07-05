@@ -37,11 +37,12 @@ _Note:_ The project used as example in this tutorial is Maven based. However, th
 
 ## Example project: AuthZForce
 
-This tutorial illustrates how to generate unit tests for [AuthZForce](https://authzforce.ow2.org), an Attribute-Based Access Control framework. More specifically, we will use the [`authzforce-core`](https://gitlab.ow2.org/authzforce/core) Maven project. Lets clone and build the project locally:
+This tutorial illustrates how to generate unit tests for [AuthZForce](https://authzforce.ow2.org), an Attribute-Based Access Control framework. More specifically, we will use the [`authzforce-core`](https://gitlab.ow2.org/authzforce/core) Maven project. Lets clone and build the project (version 13.3.0) locally:
 
 ```bash
 git clone https://gitlab.ow2.org/authzforce/core authzforce-core
 cd authzforce-core
+git checkout tags/release-13.3.0
 ```
 To execute test cases, `authzforce-core` requires the following environment variables:
 
@@ -55,6 +56,39 @@ You can now package the application and execute the test cases to check that eve
 ```bash
 mvn clean install
 ```
+
+If the Maven build fails with the following error message:
+
+```
+[ERROR] Failed to execute goal org.owasp:dependency-check-maven:3.2.1:check (default) on project authzforce-ce-core-pdp-engine:
+[ERROR]
+[ERROR] One or more dependencies were identified with vulnerabilities:
+```
+
+Open the file ` pdp-engine/pom.xml`, and comment the following lines:
+
+```xml
+<plugin>
+  <groupId>org.owasp</groupId>
+  <artifactId>dependency-check-maven</artifactId>
+  <configuration>
+    <cveValidForHours>24</cveValidForHours>
+    <!-- The plugin has numerous issues with version matching, which triggers false positives so we need a "suppresion" file for those. More info: https://github.com/jeremylong/DependencyCheck/issues -->
+    <suppressionFile>owasp-dependency-check-suppression.xml</suppressionFile>
+    <failBuildOnAnyVulnerability>true</failBuildOnAnyVulnerability>
+  </configuration>
+  <executions>
+    <execution>
+      <goals>
+        <goal>check</goal>
+      </goals>
+    </execution>
+  </executions>
+</plugin>
+```
+
+Repeat the same operation in `pdp-testutils/pom.xml`, `pdp-cli/pom.xml`, and `pdp-io-xacml-json/pom.xml` before re-executing the command `mvn clean install` again.
+
 
 Since the model generation and EvoSuite rely on an instrumentation of the binaries, the tools require to have access to the binaries of the project and all its dependencies. To download a copy of the `authzforce-core` dependencies, you can call  the [`maven-dependency-plugin`](https://maven.apache.org/plugins/maven-dependency-plugin/) plugin from `authzforce-core/` with following command:
 
@@ -86,20 +120,20 @@ The results are available in `authzforce-core/pdp-engine/target/pit-reports`. Yo
 
 ## Behavioral models learning
 
-Before proceeding to the rest of the tutorial, let's come back to the **root directory** using `cd ..` if you are in `authzforce-core/` directory of `cd ../..` if you are in the `authzforce-core/pdp-engine/` directory. 
+Before proceeding to the rest of the tutorial, let's come back to the **root directory** using `cd ..` if you are in `authzforce-core/` directory of `cd ../..` if you are in the `authzforce-core/pdp-engine/` directory.
 
 Behavioral models represent the usages of the different objects involved in the project. To learn (i.e., generate) behavioral models for an application, we will use a utility called `botsing-model-generation` that (i) statically analyses the source code of the project and (ii) executes the test cases to capture usages of the objects.
 
 The analysis and (latter) unit test generation require to access the `.class` and dependencies of AuthZForce to work. Lets first export the class path by running the following command (for Linux and Mac):
 
 ```bash
-export authzforce_classpath="authzforce-core/pdp-engine/target/classes:authzforce-core/pdp-engine/target/dependency/Saxon-HE-9.8.0-12.jar:authzforce-core/pdp-engine/target/dependency/activation-1.1.jar:authzforce-core/pdp-engine/target/dependency/animal-sniffer-annotations-1.14.jar:authzforce-core/pdp-engine/target/dependency/authzforce-ce-core-pdp-api-15.3.0.jar:authzforce-core/pdp-engine/target/dependency/authzforce-ce-pdp-ext-model-7.5.1.jar:authzforce-core/pdp-engine/target/dependency/authzforce-ce-xacml-model-7.5.1.jar:authzforce-core/pdp-engine/target/dependency/authzforce-ce-xmlns-model-7.5.1.jar:authzforce-core/pdp-engine/target/dependency/checker-compat-qual-2.0.0.jar:authzforce-core/pdp-engine/target/dependency/error_prone_annotations-2.1.3.jar:authzforce-core/pdp-engine/target/dependency/guava-24.1.1-jre.jar:authzforce-core/pdp-engine/target/dependency/hamcrest-core-1.3.jar:authzforce-core/pdp-engine/target/dependency/j2objc-annotations-1.1.jar:authzforce-core/pdp-engine/target/dependency/javax.mail-1.6.0.jar:authzforce-core/pdp-engine/target/dependency/javax.mail-api-1.6.0.jar:authzforce-core/pdp-engine/target/dependency/jaxb2-basics-runtime-1.11.1.jar:authzforce-core/pdp-engine/target/dependency/jcl-over-slf4j-1.7.25.jar:authzforce-core/pdp-engine/target/dependency/jsr305-1.3.9.jar:authzforce-core/pdp-engine/target/dependency/junit-4.11.jar:authzforce-core/pdp-engine/target/dependency/logback-classic-1.2.3.jar:authzforce-core/pdp-engine/target/dependency/logback-core-1.2.3.jar:authzforce-core/pdp-engine/target/dependency/slf4j-api-1.7.25.jar:authzforce-core/pdp-engine/target/dependency/spring-core-4.3.20.RELEASE.jar:authzforce-core/pdp-engine/target/dependency/xml-resolver-1.2.jar"
+export authzforce_classpath="authzforce-core/pdp-engine/target/classes:authzforce-core/pdp-engine/target/test-classes:authzforce-core/pdp-engine/target/dependency/Saxon-HE-9.8.0-12.jar:authzforce-core/pdp-engine/target/dependency/activation-1.1.jar:authzforce-core/pdp-engine/target/dependency/animal-sniffer-annotations-1.14.jar:authzforce-core/pdp-engine/target/dependency/authzforce-ce-core-pdp-api-15.3.0.jar:authzforce-core/pdp-engine/target/dependency/authzforce-ce-pdp-ext-model-7.5.0.jar:authzforce-core/pdp-engine/target/dependency/authzforce-ce-xacml-model-7.5.0.jar:authzforce-core/pdp-engine/target/dependency/authzforce-ce-xmlns-model-7.5.0.jar:authzforce-core/pdp-engine/target/dependency/checker-compat-qual-2.0.0.jar:authzforce-core/pdp-engine/target/dependency/error_prone_annotations-2.1.3.jar:authzforce-core/pdp-engine/target/dependency/guava-24.1.1-jre.jar:authzforce-core/pdp-engine/target/dependency/hamcrest-core-1.3.jar:authzforce-core/pdp-engine/target/dependency/j2objc-annotations-1.1.jar:authzforce-core/pdp-engine/target/dependency/javax.mail-1.6.0.jar:authzforce-core/pdp-engine/target/dependency/javax.mail-api-1.6.0.jar:authzforce-core/pdp-engine/target/dependency/jaxb2-basics-runtime-1.11.1.jar:authzforce-core/pdp-engine/target/dependency/jcl-over-slf4j-1.7.25.jar:authzforce-core/pdp-engine/target/dependency/jsr305-1.3.9.jar:authzforce-core/pdp-engine/target/dependency/junit-4.11.jar:authzforce-core/pdp-engine/target/dependency/logback-classic-1.2.3.jar:authzforce-core/pdp-engine/target/dependency/logback-core-1.2.3.jar:authzforce-core/pdp-engine/target/dependency/slf4j-api-1.7.25.jar:authzforce-core/pdp-engine/target/dependency/spring-core-4.3.18.RELEASE.jar:authzforce-core/pdp-engine/target/dependency/xml-resolver-1.2.jar"
 ```
 
 If you use Windows Powershell, you will have to use the following command:
 
 ```bash
-export authzforce_classpath="authzforce-core/pdp-engine/target/classes;authzforce-core/pdp-engine/target/dependency/Saxon-HE-9.8.0-12.jar;authzforce-core/pdp-engine/target/dependency/activation-1.1.jar;authzforce-core/pdp-engine/target/dependency/animal-sniffer-annotations-1.14.jar;authzforce-core/pdp-engine/target/dependency/authzforce-ce-core-pdp-api-15.3.0.jar;authzforce-core/pdp-engine/target/dependency/authzforce-ce-pdp-ext-model-7.5.1.jar;authzforce-core/pdp-engine/target/dependency/authzforce-ce-xacml-model-7.5.1.jar;authzforce-core/pdp-engine/target/dependency/authzforce-ce-xmlns-model-7.5.1.jar;authzforce-core/pdp-engine/target/dependency/checker-compat-qual-2.0.0.jar;authzforce-core/pdp-engine/target/dependency/error_prone_annotations-2.1.3.jar;authzforce-core/pdp-engine/target/dependency/guava-24.1.1-jre.jar;authzforce-core/pdp-engine/target/dependency/hamcrest-core-1.3.jar;authzforce-core/pdp-engine/target/dependency/j2objc-annotations-1.1.jar;authzforce-core/pdp-engine/target/dependency/javax.mail-1.6.0.jar;authzforce-core/pdp-engine/target/dependency/javax.mail-api-1.6.0.jar;authzforce-core/pdp-engine/target/dependency/jaxb2-basics-runtime-1.11.1.jar;authzforce-core/pdp-engine/target/dependency/jcl-over-slf4j-1.7.25.jar;authzforce-core/pdp-engine/target/dependency/jsr305-1.3.9.jar;authzforce-core/pdp-engine/target/dependency/junit-4.11.jar;authzforce-core/pdp-engine/target/dependency/logback-classic-1.2.3.jar;authzforce-core/pdp-engine/target/dependency/logback-core-1.2.3.jar;authzforce-core/pdp-engine/target/dependency/slf4j-api-1.7.25.jar;authzforce-core/pdp-engine/target/dependency/spring-core-4.3.20.RELEASE.jar;authzforce-core/pdp-engine/target/dependency/xml-resolver-1.2.jar"
+export authzforce_classpath="authzforce-core/pdp-engine/target/classes;authzforce-core/pdp-engine/target/test-classes;authzforce-core/pdp-engine/target/dependency/Saxon-HE-9.8.0-12.jar;authzforce-core/pdp-engine/target/dependency/activation-1.1.jar;authzforce-core/pdp-engine/target/dependency/animal-sniffer-annotations-1.14.jar;authzforce-core/pdp-engine/target/dependency/authzforce-ce-core-pdp-api-15.3.0.jar;authzforce-core/pdp-engine/target/dependency/authzforce-ce-pdp-ext-model-7.5.0.jar;authzforce-core/pdp-engine/target/dependency/authzforce-ce-xacml-model-7.5.0.jar;authzforce-core/pdp-engine/target/dependency/authzforce-ce-xmlns-model-7.5.0.jar;authzforce-core/pdp-engine/target/dependency/checker-compat-qual-2.0.0.jar;authzforce-core/pdp-engine/target/dependency/error_prone_annotations-2.1.3.jar;authzforce-core/pdp-engine/target/dependency/guava-24.1.1-jre.jar;authzforce-core/pdp-engine/target/dependency/hamcrest-core-1.3.jar;authzforce-core/pdp-engine/target/dependency/j2objc-annotations-1.1.jar;authzforce-core/pdp-engine/target/dependency/javax.mail-1.6.0.jar;authzforce-core/pdp-engine/target/dependency/javax.mail-api-1.6.0.jar;authzforce-core/pdp-engine/target/dependency/jaxb2-basics-runtime-1.11.1.jar;authzforce-core/pdp-engine/target/dependency/jcl-over-slf4j-1.7.25.jar;authzforce-core/pdp-engine/target/dependency/jsr305-1.3.9.jar;authzforce-core/pdp-engine/target/dependency/junit-4.11.jar;authzforce-core/pdp-engine/target/dependency/logback-classic-1.2.3.jar;authzforce-core/pdp-engine/target/dependency/logback-core-1.2.3.jar;authzforce-core/pdp-engine/target/dependency/slf4j-api-1.7.25.jar;authzforce-core/pdp-engine/target/dependency/spring-core-4.3.18.RELEASE.jar;authzforce-core/pdp-engine/target/dependency/xml-resolver-1.2.jar"
 ```
 
 We can now launch the models generation by executing the following commands from the **root directory**:
