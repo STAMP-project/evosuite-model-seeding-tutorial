@@ -1,7 +1,7 @@
 
-# EvoSuite Behavioral Models Seeding Tutorial
+# EvoSuite-RAMP Tutorial
 
-Welcome to this tutorial on behavioral model seeding for [EvoSuite](http://www.evosuite.org)!
+Welcome to this tutorial on behavioral model seeding with RAMP!
 
 ## Introduction to Behavioral Models Seeding
 
